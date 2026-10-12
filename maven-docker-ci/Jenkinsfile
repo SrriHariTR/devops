@@ -1,0 +1,36 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('Test and Build') {
+            steps {
+                dir('maven-docker-ci') {
+                    bat 'mvn clean test package'
+                }
+            }
+        }
+
+        stage('Docker Build') {
+            steps {
+                dir('maven-docker-ci') {
+                    bat 'docker build -t maven-docker-ci:1.0 .'
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'SUCCESS: Tests passed and Docker image built.'
+        }
+        failure {
+            echo 'FAILED: Check the Jenkins Console Output.'
+        }
+    }
+}
